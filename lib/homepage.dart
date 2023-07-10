@@ -125,89 +125,97 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          callWeatheData();
-        },
-        child: ListView.builder(
-          itemCount: wetherStatus.length,
-          itemBuilder: (context, index) => Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF5130A7),
-                  Color(0xFF5130A7),
-                  Color(0xFF8F6AC6),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+      body: inProgress
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: () async {
+                callWeatheData();
+              },
+              child: ListView.builder(
+                itemCount: wetherStatus.length,
+                itemBuilder: (context, index) => Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF5130A7),
+                        Color(0xFF5130A7),
+                        Color(0xFF8F6AC6),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        height: 120,
+                      ),
+                      Text(
+                        loc,
+                        style: const TextStyle(
+                            fontSize: 23,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
+                      ),
+                      Text(
+                        'Updated: ${DateFormat('hh:mm a').format(DateTime.now())}',
+                        style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white),
+                      ),
+                      const SizedBox(
+                        height: 60,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            height: 150,
+                            width: 100,
+                            child: Image.network(
+                                'https://openweathermap.org/img/wn/${weatherType[index].icon}@2x.png',
+                                fit: BoxFit.cover),
+                          ),
+                          Text(
+                            '${(wetherStatus[index].temp - 273.15).toStringAsPrecision(2)}°',
+                            style: const TextStyle(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white),
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                'max: ${(wetherStatus[index].tempMax - 273.15).toStringAsPrecision(2)}°',
+                                style: const TextStyle(
+                                    fontSize: 15, color: Colors.white),
+                              ),
+                              Text(
+                                'min: ${(wetherStatus[index].tempMin - 273.15).toStringAsPrecision(2)}°',
+                                style: const TextStyle(
+                                    fontSize: 15, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 60,
+                      ),
+                      Text(
+                        weatherType[index].description.toCapitalized(),
+                        style:
+                            const TextStyle(fontSize: 23, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 120,
-                ),
-                Text(
-                  loc,
-                  style: const TextStyle(
-                      fontSize: 23,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white),
-                ),
-                Text(
-                  'Updated: ${DateFormat('hh:mm a').format(DateTime.now())}',
-                  style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white),
-                ),
-                const SizedBox(
-                  height: 80,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Image.network(
-                        'https://openweathermap.org/img/wn/${weatherType[index].icon}@2x.png'),
-                    Text(
-                      '${(wetherStatus[index].temp - 273.15).toStringAsPrecision(2)}°',
-                      style: const TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          'max: ${(wetherStatus[index].tempMax - 273.15).toStringAsPrecision(2)}°',
-                          style: const TextStyle(
-                              fontSize: 15, color: Colors.white),
-                        ),
-                        Text(
-                          'min: ${(wetherStatus[index].tempMin - 273.15).toStringAsPrecision(2)}°',
-                          style: const TextStyle(
-                              fontSize: 15, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 60,
-                ),
-                Text(
-                  weatherType[index].description.toCapitalized(),
-                  style: const TextStyle(fontSize: 23, color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
