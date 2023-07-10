@@ -19,11 +19,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    super.initState();
     callWeatheData();
-    DateFormat('hh:mm a').format(DateTime.now());
+
     fToast = FToast();
     fToast!.init(context);
+    super.initState();
   }
 
   void showToast() {
@@ -94,6 +94,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     //print(response.statusCode);
     if (response.statusCode == 200) {
+      wetherStatus = [];
+      weatherType = [];
+      DateFormat('hh:mm a').format(DateTime.now());
       showToast();
       final Map<String, dynamic> mainData = decodedresponse['main'];
       //final Map<String, dynamic> weatherType = decodedresponse['weather'];
@@ -116,24 +119,22 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF7C51FE),
-        title: const Text('Weather App'),
-        elevation: 5,
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
-        ],
-      ),
-      body: inProgress
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () async {
-                callWeatheData();
-              },
-              child: ListView.builder(
-                itemCount: wetherStatus.length,
-                itemBuilder: (context, index) => Container(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF7C51FE),
+          title: const Text('Weather App'),
+          elevation: 5,
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+          ],
+        ),
+        body: inProgress
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: () async {
+                  callWeatheData();
+                },
+                child: Container(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
                   decoration: const BoxDecoration(
@@ -147,9 +148,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       end: Alignment.bottomCenter,
                     ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
+                  child: ListView.builder(
+                    itemCount: weatherType.length,
+                    itemBuilder: (context, index) => Column(children: [
                       const SizedBox(
                         height: 120,
                       ),
@@ -171,52 +172,48 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: 60,
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            height: 150,
-                            width: 100,
-                            child: Image.network(
-                                'https://openweathermap.org/img/wn/${weatherType[index].icon}@2x.png',
-                                fit: BoxFit.cover),
-                          ),
-                          Text(
-                            '${(wetherStatus[index].temp - 273.15).toStringAsPrecision(2)}°',
-                            style: const TextStyle(
-                                fontSize: 23,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white),
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                'max: ${(wetherStatus[index].tempMax - 273.15).toStringAsPrecision(2)}°',
-                                style: const TextStyle(
-                                    fontSize: 15, color: Colors.white),
-                              ),
-                              Text(
-                                'min: ${(wetherStatus[index].tempMin - 273.15).toStringAsPrecision(2)}°',
-                                style: const TextStyle(
-                                    fontSize: 15, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            SizedBox(
+                              height: 150,
+                              width: 100,
+                              child: Image.network(
+                                  'https://openweathermap.org/img/wn/${weatherType[index].icon}@2x.png',
+                                  fit: BoxFit.cover),
+                            ),
+                            Text(
+                              '${(wetherStatus[index].temp - 273.15).toStringAsPrecision(2)}°',
+                              style: const TextStyle(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white),
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  'max: ${(wetherStatus[index].tempMax - 273.15).toStringAsPrecision(2)}°',
+                                  style: const TextStyle(
+                                      fontSize: 15, color: Colors.white),
+                                ),
+                                Text(
+                                  'min: ${(wetherStatus[index].tempMin - 273.15).toStringAsPrecision(2)}°',
+                                  style: const TextStyle(
+                                      fontSize: 15, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ]),
                       const SizedBox(
-                        height: 60,
+                        height: 40,
                       ),
                       Text(
                         weatherType[index].description.toCapitalized(),
                         style:
                             const TextStyle(fontSize: 23, color: Colors.white),
                       ),
-                    ],
+                    ]),
                   ),
-                ),
-              ),
-            ),
-    );
+                )));
   }
 }
 
