@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+//import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'weather.dart';
+import 'package:location/location.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
@@ -19,13 +22,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    callWeatheData();
-
+    _getUserLocation();
     fToast = FToast();
     fToast!.init(context);
     super.initState();
   }
 
+  // late String address;
+  // Future<void> GetAddressFromLatLong(Position position) async {
+  //   List<Placemark> placemarks =
+  //       await placemarkFromCoordinates(position.latitude, position.longitude);
+  //   print(placemarks);
+  //   Placemark place = placemarks[0];
+  //   address =
+  //       '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+  // }
+
+// Future<Position> position =  Geolocator.getCurrentPosition(
+//   desiredAccuracy: LocationAccuracy.high).timeout(Duration(seconds: 5));
   void showToast() {
     Widget toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -78,18 +92,50 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  LocationData? _userLocation;
+
+  Future<void> _getUserLocation() async {
+    Location location = Location();
+
+    // Check if location service is enable
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    // Check if permission is granted
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    final locationData = await location.getLocation();
+    setState(() {
+      _userLocation = locationData;
+    });
+    callWeatheData();
+  }
+
   List<Weather> wetherStatus = [];
   List<WeatherType> weatherType = [];
   //DateTime time;
   //String wetherStatus= '';
   bool inProgress = false;
   String loc = '';
-
   callWeatheData() async {
     inProgress = true;
     setState(() {});
+
     Response response = await get(Uri.parse(
-        'https://api.openweathermap.org/data/2.5/weather?q=Dhaka,+880&appid=d1840033ceeae46556982cd01e91d0e6'));
+        'https://api.openweathermap.org/data/2.5/weather?lat=${_userLocation?.latitude}&lon=${_userLocation?.longitude}&appid=d1840033ceeae46556982cd01e91d0e6'));
     final Map<String, dynamic> decodedresponse = jsonDecode(response.body);
 
     //print(response.statusCode);
@@ -132,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ? const Center(child: CircularProgressIndicator())
             : RefreshIndicator(
                 onRefresh: () async {
-                  callWeatheData();
+                  _getUserLocation();
                 },
                 child: Container(
                   height: MediaQuery.of(context).size.height,
